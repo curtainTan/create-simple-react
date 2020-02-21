@@ -117,16 +117,118 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"react-dom/index.js":[function(require,module,exports) {
+})({"react-dom/diff.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.diff = diff;
+
+var _index = require("./index");
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
+function diff(dom, vnode, container) {
+  // 对比节点变化
+  var ret = diffNode(dom, vnode);
+
+  if (container) {
+    container.appendChild(ret);
+  }
+
+  return ret;
+}
+
+function diffNode(dom, vnode) {
+  var out = dom;
+  if (vnode === undefined || vnode === null || typeof vnode === "boolean") return; // 数字转换成 字符串
+
+  if (typeof vnode === "number") vnode = String(vnode); // 如果 vnode 是字符串，直接渲染
+
+  if (typeof vnode === "string") {
+    // 创建文本节点
+    if (dom && dom.nodeType === 3) {
+      if (dom.textContent !== vnode) {
+        // 更新文本内容
+        dom.textContent = vnode;
+      }
+    } else {
+      out = document.createTextNode(vnode);
+
+      if (out && dom.parentNode) {
+        dom.parentNode.replaceNode(out, dom);
+      }
+    }
+
+    return out;
+  } // 非文本 DOM 节点
+
+
+  if (!dom) {
+    out = document.createElement(vnode.tag);
+  }
+
+  diffAttribute(out, vnode); // 比较子节点
+
+  if (vnode.childrends && vnode.childrends.length > 0 || out.childNodes && out.childNodes.length > 0) {
+    // 对比组件 或 子节点
+    diffChildren(out, vnode.childNodes);
+  }
+
+  return out;
+}
+
+function diffChildren(out, vChildren) {}
+
+function diffAttribute(dom, vnode) {
+  // 保存之前 dom 的所有属性
+  var oldAttrs = {};
+  var newAttrs = vnode.attrs; // dom 是原有的节点对象 vnode 是虚拟dom
+
+  var attributes = dom.attributes;
+  console.log("执行到这里了--", attributes);
+
+  _toConsumableArray(attributes).forEach(function (element) {
+    oldAttrs[element.name] = element.value;
+  }); // 比较
+  // 原来是属性跟新的属性对比，不在新的属性中，则将其移除掉(编程 undefined)
+
+
+  for (var key in oldAttrs) {
+    if (!(key in newAttrs)) {
+      (0, _index.setAttribute)(dom, key, undefined);
+    }
+  } // 更新 属性
+
+
+  for (var _key in newAttrs) {
+    if (oldAttrs[_key] !== newAttrs[_key]) {
+      (0, _index.setAttribute)(dom, _key, newAttrs[_key]);
+    }
+  }
+
+  console.log(oldAttrs);
+}
+},{"./index":"react-dom/index.js"}],"react-dom/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.renderComponent = renderComponent;
+exports.setAttribute = setAttribute;
 exports.default = void 0;
 
 var _component = _interopRequireDefault(require("../react/component"));
+
+var _diff = require("./diff");
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -140,8 +242,8 @@ var ReactDOM = {
   render: render
 };
 
-function render(vnode, container) {
-  return container.appendChild(_render(vnode));
+function render(vnode, container, dom) {
+  return (0, _diff.diff)(dom, vnode, container); // return container.appendChild( _render( vnode ) )
 }
 
 function _render(vnode) {
@@ -296,7 +398,7 @@ function setAttribute(dom, key, val) {
 
 var _default = ReactDOM;
 exports.default = _default;
-},{"../react/component":"react/component.js"}],"react/component.js":[function(require,module,exports) {
+},{"../react/component":"react/component.js","./diff":"react-dom/diff.js"}],"react/component.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -397,23 +499,21 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
-// const ele = (
-//     <div className="active" title="tan">
-//         hello,<span>react</span>
-//     </div>
-// )
-// react核心：组件化开发
+var ele = _index.default.createElement("div", {
+  className: "active",
+  title: "tan"
+}, "hello,", _index.default.createElement("span", null, "react")); // react核心：组件化开发
 // 两个问题：
 // 1. 为什么 ReactDOM.render() 函数需要引入 React  需要使用 React.createElement() 生成 vnode
 // 2. 组件：函数组件 类组件
 // 函数组件
+
+
 function Home() {
   return _index.default.createElement("div", {
     className: "active",
     title: "tan"
-  }, "hello,", _index.default.createElement("span", null, "react"), _index.default.createElement(Tan, {
-    tan: "我是传进来的参数"
-  }));
+  });
 }
 
 var Tan =
@@ -477,11 +577,10 @@ function (_React$Component) {
   }]);
 
   return Tan;
-}(_index.default.Component);
+}(_index.default.Component); // ReactDOM.render( <Home name="arr name" />, document.querySelector("#root") )
 
-_index2.default.render(_index.default.createElement(Home, {
-  name: "arr name"
-}), document.querySelector("#root")); // "use strict";
+
+_index2.default.render(ele, document.querySelector("#root")); // "use strict";
 // var ele = React.createElement("div", {
 //   className: "active",
 //   title: "tan"
@@ -515,7 +614,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "6265" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "10647" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

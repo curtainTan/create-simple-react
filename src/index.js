@@ -1,11 +1,11 @@
 import React from "../react/index.js"
 import ReactDOM from "../react-dom/index.js"
 
-// const ele = (
-//     <div className="active" title="tan">
-//         hello,<span>react</span>
-//     </div>
-// )
+const ele = (
+    <div className="active" title="tan">
+        hello,<span>react</span>
+    </div>
+)
 
 // react核心：组件化开发
 
@@ -18,8 +18,8 @@ import ReactDOM from "../react-dom/index.js"
 function Home(){
     return (
         <div className="active" title="tan">
-            hello,<span>react</span>
-            <Tan tan="我是传进来的参数" />
+            {/* hello,<span>react</span> */}
+            {/* <Tan tan="我是传进来的参数" /> */}
         </div>
     )
 }
@@ -71,7 +71,8 @@ class Tan extends React.Component {
     }
 }
 
-ReactDOM.render( <Home name="arr name" />, document.querySelector("#root") )
+// ReactDOM.render( <Home name="arr name" />, document.querySelector("#root") )
+ReactDOM.render( ele, document.querySelector("#root") )
 
 
 

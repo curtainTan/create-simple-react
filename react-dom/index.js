@@ -6,18 +6,19 @@
 // ReactDOM.render( "my React", document.querySelector("#root") )
 
 import Component from "../react/component"
+import { diff } from "./diff"
 
 const ReactDOM = {
     render
 }
 
-function render( vnode, container ){
-    return container.appendChild( _render( vnode ) )
+function render( vnode, container, dom ){
+    return diff( dom, vnode, container )
+    // return container.appendChild( _render( vnode ) )
 }
 
 function _render( vnode ){
-    if( vnode === undefined || vnode === null || typeof vnode === "boolean" )
-    return
+    if( vnode === undefined || vnode === null || typeof vnode === "boolean" ) return
 
     // 数字转换成 字符串
     if( typeof vnode === "number" ) vnode = String( vnode )
@@ -112,7 +113,7 @@ export function renderComponent( comp ){
  * @param {*} key 
  * @param {*} val 
  */
-function setAttribute( dom, key, val ){
+export function setAttribute( dom, key, val ){
     // 设置 类名
     if( key === "className" ){
         key = "class"
