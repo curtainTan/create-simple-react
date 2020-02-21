@@ -1,11 +1,11 @@
 import React from "../react/index.js"
 import ReactDOM from "../react-dom/index.js"
 
-const ele = (
-    <div className="active" title="tan">
-        hello,<span>react</span>
-    </div>
-)
+// const ele = (
+//     <div className="active" title="tan">
+//         hello,<span>react</span>
+//     </div>
+// )
 
 // react核心：组件化开发
 
@@ -13,7 +13,26 @@ const ele = (
 // 1. 为什么 ReactDOM.render() 函数需要引入 React  需要使用 React.createElement() 生成 vnode
 // 2. 组件：函数组件 类组件
 
-ReactDOM.render( ele, document.querySelector("#root") )
+
+// 函数组件
+function Home(){
+    return (
+        <div className="active" title="tan">
+            hello,<span>react</span>
+            <Tan />
+        </div>
+    )
+}
+
+function Tan(){
+    return (
+        <h1>
+            我是嵌套函数--
+        </h1>
+    )
+}
+
+ReactDOM.render( <Home name="arr name" />, document.querySelector("#root") )
 
 
 

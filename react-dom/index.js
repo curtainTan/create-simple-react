@@ -5,20 +5,34 @@
 // }, "hello,", React.createElement("span", null, "react"));
 // ReactDOM.render( "my React", document.querySelector("#root") )
 
+import Component from "../react/component"
 
 const ReactDOM = {
     render
 }
 
 function render( vnode, container ){
-    console.log( vnode )
-    if( vnode === undefined ) return
+    return container.appendChild( _render( vnode ) )
+}
+
+function _render( vnode ){
+    if( vnode === undefined || vnode === null || typeof vnode === "boolean" )
+    return
 
     // 如果 vnode 是字符串，直接渲染
     if( typeof vnode === "string" ){
         // 创建文本节点
-        const textNode = document.createTextNode( vnode )
-        return container.appendChild( textNode )
+        return document.createTextNode( vnode )
+    }
+    // 如果 tag 是函数， 则渲染组件
+    if( typeof vnode.tag === "function" ){
+        console.log( "函数组件---",vnode.tag )
+        // 1. 创建组件
+        const comp = createComponent( vnode.tag, vnode.attrs )
+        // 2. 设置组件的属性
+        setComponentProps( comp, vnode.attrs )
+        // 3. 返回组件渲染的节点对象
+        return comp.base
     }
     // vnode 是虚拟 DOM 对象
     const { tag, attrs } = vnode
@@ -34,7 +48,42 @@ function render( vnode, container ){
     // 渲染子节点
     vnode.childrens.forEach( child => render( child, dom ) )
     // 返回节点 并挂载子节点
-    return container.appendChild( dom )
+    return dom
+}
+
+
+function createComponent( comp, props ){
+    let instance
+    // 如果是类定义在组件，则创建实例  返回
+    if( comp.prototype && comp.prototype.render ){
+        instance = new comp( props )
+    } else {
+        // 函数组件 将函数组件扩展成 类组件   方便统一管理
+        instance = new Component( props )
+        instance.constructor = comp
+        // 定义 render 函数
+        instance.render = function(){
+            return this.constructor( props )
+        }
+    }
+    return instance
+}
+
+// 设置组件属性
+function setComponentProps( comp, props ){
+    // 设置组件属性
+    comp.props = props
+    // 渲染组件
+    renderComponent( comp )
+}
+// 渲染组件
+function renderComponent( comp ){
+    console.log( "渲染组件-----renderComponent",comp )
+    const renderer = comp.render()
+    console.log( renderer )
+    let base = _render( renderer )
+    comp.base = base
+
 }
 
 /**

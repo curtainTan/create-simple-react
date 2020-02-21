@@ -142,6 +142,27 @@ function createElement(tag, attrs) {
 
 var _default = React;
 exports.default = _default;
+},{}],"react/component.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Componet = function Componet() {
+  var props = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+  _classCallCheck(this, Componet);
+
+  this.props = props;
+  this.state = {};
+};
+
+var _default = Componet;
+exports.default = _default;
 },{}],"react-dom/index.js":[function(require,module,exports) {
 "use strict";
 
@@ -149,6 +170,11 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = void 0;
+
+var _component = _interopRequireDefault(require("../react/component"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 // "use strict";
 // var ele = React.createElement("div", {
 //   className: "active",
@@ -160,13 +186,26 @@ var ReactDOM = {
 };
 
 function render(vnode, container) {
-  console.log(vnode);
-  if (vnode === undefined) return; // 如果 vnode 是字符串，直接渲染
+  return container.appendChild(_render(vnode));
+}
+
+function _render(vnode) {
+  if (vnode === undefined || vnode === null || typeof vnode === "boolean") return; // 如果 vnode 是字符串，直接渲染
 
   if (typeof vnode === "string") {
     // 创建文本节点
-    var textNode = document.createTextNode(vnode);
-    return container.appendChild(textNode);
+    return document.createTextNode(vnode);
+  } // 如果 tag 是函数， 则渲染组件
+
+
+  if (typeof vnode.tag === "function") {
+    console.log("函数组件---", vnode.tag); // 1. 创建组件
+
+    var comp = createComponent(vnode.tag, vnode.attrs); // 2. 设置组件的属性
+
+    setComponentProps(comp, vnode.attrs); // 3. 返回组件渲染的节点对象
+
+    return comp.base;
   } // vnode 是虚拟 DOM 对象
 
 
@@ -187,7 +226,44 @@ function render(vnode, container) {
     return render(child, dom);
   }); // 返回节点 并挂载子节点
 
-  return container.appendChild(dom);
+  return dom;
+}
+
+function createComponent(comp, props) {
+  var instance; // 如果是类定义在组件，则创建实例  返回
+
+  if (comp.prototype && comp.prototype.render) {
+    instance = new comp(props);
+  } else {
+    // 函数组件 将函数组件扩展成 类组件   方便统一管理
+    instance = new _component.default(props);
+    instance.constructor = comp; // 定义 render 函数
+
+    instance.render = function () {
+      return this.constructor(props);
+    };
+  }
+
+  return instance;
+} // 设置组件属性
+
+
+function setComponentProps(comp, props) {
+  // 设置组件属性
+  comp.props = props; // 渲染组件
+
+  renderComponent(comp);
+} // 渲染组件
+
+
+function renderComponent(comp) {
+  console.log("渲染组件-----renderComponent", comp);
+  var renderer = comp.render();
+  console.log(renderer);
+
+  var base = _render(renderer);
+
+  comp.base = base;
 }
 /**
  * 设置属性
@@ -241,7 +317,7 @@ function setAttribute(dom, key, val) {
 
 var _default = ReactDOM;
 exports.default = _default;
-},{}],"src/index.js":[function(require,module,exports) {
+},{"../react/component":"react/component.js"}],"src/index.js":[function(require,module,exports) {
 "use strict";
 
 var _index = _interopRequireDefault(require("../react/index.js"));
@@ -250,16 +326,30 @@ var _index2 = _interopRequireDefault(require("../react-dom/index.js"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var ele = _index.default.createElement("div", {
-  className: "active",
-  title: "tan"
-}, "hello,", _index.default.createElement("span", null, "react")); // react核心：组件化开发
+// const ele = (
+//     <div className="active" title="tan">
+//         hello,<span>react</span>
+//     </div>
+// )
+// react核心：组件化开发
 // 两个问题：
 // 1. 为什么 ReactDOM.render() 函数需要引入 React  需要使用 React.createElement() 生成 vnode
 // 2. 组件：函数组件 类组件
+// 函数组件
+function Home() {
+  return _index.default.createElement("div", {
+    className: "active",
+    title: "tan"
+  }, "hello,", _index.default.createElement("span", null, "react"), _index.default.createElement(Tan, null));
+}
 
+function Tan() {
+  return _index.default.createElement("h1", null, "\u6211\u662F\u5D4C\u5957\u51FD\u6570--");
+}
 
-_index2.default.render(ele, document.querySelector("#root")); // "use strict";
+_index2.default.render(_index.default.createElement(Home, {
+  name: "arr name"
+}), document.querySelector("#root")); // "use strict";
 // var ele = React.createElement("div", {
 //   className: "active",
 //   title: "tan"
@@ -293,7 +383,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "1741" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "13482" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
