@@ -500,7 +500,83 @@ function setAttribute(dom, key, val) {
 
 var _default = ReactDOM;
 exports.default = _default;
-},{"../react/component":"react/component.js","./diff":"react-dom/diff.js"}],"react/component.js":[function(require,module,exports) {
+},{"../react/component":"react/component.js","./diff":"react-dom/diff.js"}],"react/setState_queue.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.enqueueSetState = enqueueSetState;
+
+var _index = require("../react-dom/index");
+
+/**
+ * 1. 异步更新 state
+ * 2. 短时间内将多个 state合并到一个（队列当中）
+ * 3. 一段时间之后，循环遍历，清空队列
+ */
+var setStateQueue = []; // 保存当前的组件
+
+var renderQueue = [];
+
+function defer(fn) {
+  return Promise.resolve().then(fn);
+}
+
+function enqueueSetState(stateChange, component) {
+  if (setStateQueue.length === 0) {
+    defer(flush); // setTimeout( () => {
+    //     flush()
+    // }, 60 )
+  } // 1. 短时间内 合并多个 setState
+
+
+  setStateQueue.push({
+    stateChange: stateChange,
+    component: component
+  }); // 如果 renderQueue 里面没有组件，添加到队列中
+
+  var res = renderQueue.some(function (item) {
+    return item === component;
+  });
+
+  if (!res) {
+    // 证明是第一次添加
+    renderQueue.push(component);
+  }
+} // 一段时间后
+
+
+function flush() {
+  var item, component;
+
+  while (item = setStateQueue.shift()) {
+    var _item = item,
+        stateChange = _item.stateChange,
+        _component = _item.component; // 保存之前的状态
+
+    if (!_component.prevState) {
+      _component.prevState = Object.assign({}, _component.state);
+    } // 
+
+
+    if (typeof stateChange === "function") {
+      // 函数
+      Object.assign(_component.state, stateChange(_component.prevState, _component.props));
+    } else {
+      // 对象
+      Object.assign(_component.state, stateChange);
+    } // 赋值
+
+
+    _component.prevState = _component.state;
+  }
+
+  while (component = renderQueue.shift()) {
+    (0, _index.renderComponent)(component);
+  }
+}
+},{"../react-dom/index":"react-dom/index.js"}],"react/component.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -508,7 +584,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _reactDom = require("../react-dom");
+var _setState_queue = require("./setState_queue");
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -532,9 +608,10 @@ function () {
     key: "setState",
     value: function setState(stateChange) {
       // 对象拷贝
-      Object.assign(this.state, stateChange); // 渲染组件
-
-      (0, _reactDom.renderComponent)(this);
+      // Object.assign( this.state, stateChange )
+      // // 渲染组件
+      // renderComponent( this )
+      (0, _setState_queue.enqueueSetState)(stateChange, this);
     }
   }]);
 
@@ -543,7 +620,7 @@ function () {
 
 var _default = Componet;
 exports.default = _default;
-},{"../react-dom":"react-dom/index.js"}],"react/index.js":[function(require,module,exports) {
+},{"./setState_queue":"react/setState_queue.js"}],"react/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -654,6 +731,15 @@ function (_React$Component) {
     value: function componentDidMount() {
       console.log("组件加载完成--");
       console.log(this.state.list);
+
+      for (var i = 0; i < 10; i++) {
+        this.setState(function (preState, preProps) {
+          console.log("之前的状态：", preState);
+          return {
+            num: preState.num + 1
+          };
+        });
+      }
     }
   }, {
     key: "componentWillUpdate",
@@ -724,7 +810,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "7345" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "9213" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

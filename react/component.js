@@ -1,4 +1,5 @@
-import { renderComponent } from "../react-dom"
+// import { renderComponent } from "../react-dom"
+import { enqueueSetState } from "./setState_queue"
 
 class Componet {
     constructor( props = {} ){
@@ -8,9 +9,11 @@ class Componet {
 
     setState( stateChange ){
         // 对象拷贝
-        Object.assign( this.state, stateChange )
-        // 渲染组件
-        renderComponent( this )
+        // Object.assign( this.state, stateChange )
+        // // 渲染组件
+        // renderComponent( this )
+
+        enqueueSetState( stateChange, this )
     }
 }
 

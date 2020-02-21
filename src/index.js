@@ -45,6 +45,14 @@ class Tan extends React.Component {
     componentDidMount(){
         console.log( "组件加载完成--" )
         console.log( this.state.list )
+        for( let i = 0; i < 10; i ++  ){
+            this.setState( ( preState, preProps ) => {
+                console.log( "之前的状态：", preState )
+                return {
+                    num: preState.num + 1
+                }
+            })
+        }
     }
 
     componentWillUpdate(){
