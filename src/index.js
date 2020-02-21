@@ -18,7 +18,7 @@ const ele = (
 function Home(){
     return (
         <div className="active" title="tan">
-            {/* hello,<span>react</span> */}
+            hello,<span>react</span>
             {/* <Tan tan="我是传进来的参数" /> */}
         </div>
     )
@@ -63,16 +63,17 @@ class Tan extends React.Component {
 
     render(){
         return (
-            <div>
+            <div className="active">
                 <h1>我是类组件-----{ this.state.num }</h1>
                 <button onClick={ this.handleClick.bind( this ) } >点击</button>
+                {/* <h1 key={"test_key"} >我是一个有key的组件</h1> */}
             </div>
         )
     }
 }
 
 // ReactDOM.render( <Home name="arr name" />, document.querySelector("#root") )
-ReactDOM.render( ele, document.querySelector("#root") )
+ReactDOM.render( <Tan />, document.querySelector("#root") )
 
 
 

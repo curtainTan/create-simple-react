@@ -124,8 +124,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.diff = diff;
+exports.diffNode = diffNode;
 
-var _index = require("./index");
+var _index = require("./index.js");
 
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
 
@@ -162,14 +163,20 @@ function diffNode(dom, vnode) {
     } else {
       out = document.createTextNode(vnode);
 
-      if (out && dom.parentNode) {
+      if (dom && dom.parentNode) {
         dom.parentNode.replaceNode(out, dom);
       }
     }
 
     return out;
-  } // 非文本 DOM 节点
+  } // 如果 tag 是组件
 
+
+  if (typeof vnode.tag === "function") {
+    return diffComponent(out, vnode);
+  }
+
+  console.log("执行到这里ile---"); // 非文本 DOM 节点
 
   if (!dom) {
     out = document.createElement(vnode.tag);
@@ -177,15 +184,110 @@ function diffNode(dom, vnode) {
 
   diffAttribute(out, vnode); // 比较子节点
 
-  if (vnode.childrends && vnode.childrends.length > 0 || out.childNodes && out.childNodes.length > 0) {
+  if (vnode.childrens && vnode.childrens.length > 0 || out.childNodes && out.childNodes.length > 0) {
     // 对比组件 或 子节点
-    diffChildren(out, vnode.childNodes);
+    diffChildren(out, vnode.childrens);
   }
 
   return out;
 }
 
-function diffChildren(out, vChildren) {}
+function diffComponent(dom, vNode) {
+  var comp = dom; // 如果组件没有变化 重新设置 props
+
+  if (comp && comp.constructor === vNode.tag) {
+    // 重新设置 props
+    (0, _index.setComponentProps)(comp, vNode.attrs); // 赋值
+
+    dom = comp.base;
+  } else {
+    // 组件发生变化
+    if (comp) {
+      // 先移除组件
+      unmountComponent(comp);
+      comp = null;
+    } // 1. 创建新的节点
+    // 2. 设置组件属性
+    // 3. 给当前组件挂载 base
+
+
+    comp = (0, _index.createComponent)(vNode.tag, vNode.attrs);
+    (0, _index.setComponentProps)(comp, vNode.attrs);
+    dom = comp.base;
+  }
+
+  return dom;
+}
+
+function unmountComponent(comp) {
+  removeNode(comp.base);
+}
+
+function removeNode(dom) {
+  if (dom && dom.parentNode) {
+    dom.parentNode.removeNode(dom);
+  }
+}
+
+function diffChildren(dom, vChildren) {
+  var domChildren = dom.childNodes;
+  var children = [];
+  var keyed = {}; // 将有 key 的节点（用对象保存）和没有 key 的节点（用数组保存）分开
+
+  if (domChildren && domChildren.length > 0) {
+    vChildren.forEach(function (item) {
+      if (item.key !== null) {
+        keyed[item.key] = item;
+      } else {
+        children.push(item);
+      }
+    });
+  }
+
+  if (vChildren && vChildren.length > 0) {
+    var min = 0;
+    var childrenLen = vChildren.length;
+    console.log("开始 forEarch:", vChildren);
+
+    _toConsumableArray(vChildren).forEach(function (vChild, i) {
+      var key = vChild.key;
+      var child;
+
+      if (key) {
+        if (keyed[key]) {
+          child = keyed[key];
+          keyed[key] = undefined;
+        }
+      } else if (childrenLen > min) {
+        for (var j = min; j < childrenLen; j++) {
+          var c = children[j];
+
+          if (c) {
+            child = c;
+            children[j] = undefined;
+            if (j === childrenLen - 1) childrenLen--;
+            if (j === min) min++;
+            break;
+          }
+        }
+      }
+
+      child = diffNode(child, vChild); // 更新 dom
+
+      var f = domChildren && domChildren[i];
+
+      if (child && child !== dom && child !== f) {
+        if (!f) {
+          dom.appendChild(child);
+        } else if (child === f.nextSibling) {
+          removeNode(f);
+        } else {
+          dom.insertBefore(child, f);
+        }
+      }
+    });
+  }
+}
 
 function diffAttribute(dom, vnode) {
   // 保存之前 dom 的所有属性
@@ -193,11 +295,12 @@ function diffAttribute(dom, vnode) {
   var newAttrs = vnode.attrs; // dom 是原有的节点对象 vnode 是虚拟dom
 
   var attributes = dom.attributes;
-  console.log("执行到这里了--", attributes);
 
-  _toConsumableArray(attributes).forEach(function (element) {
-    oldAttrs[element.name] = element.value;
-  }); // 比较
+  if (attributes) {
+    _toConsumableArray(attributes).forEach(function (element) {
+      oldAttrs[element.name] = element.value;
+    });
+  } // 比较
   // 原来是属性跟新的属性对比，不在新的属性中，则将其移除掉(编程 undefined)
 
 
@@ -213,15 +316,15 @@ function diffAttribute(dom, vnode) {
       (0, _index.setAttribute)(dom, _key, newAttrs[_key]);
     }
   }
-
-  console.log(oldAttrs);
 }
-},{"./index":"react-dom/index.js"}],"react-dom/index.js":[function(require,module,exports) {
+},{"./index.js":"react-dom/index.js"}],"react-dom/index.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.createComponent = createComponent;
+exports.setComponentProps = setComponentProps;
 exports.renderComponent = renderComponent;
 exports.setAttribute = setAttribute;
 exports.default = void 0;
@@ -325,9 +428,10 @@ function setComponentProps(comp, props) {
 
 
 function renderComponent(comp) {
-  var renderer = comp.render();
+  var renderer = comp.render(); // let base = _render( renderer )
+  // 重新渲染
 
-  var base = _render(renderer);
+  var base = (0, _diff.diffNode)(comp.base, renderer);
 
   if (comp.base && comp.componentWillUpdate) {
     comp.componentWillUpdate();
@@ -338,11 +442,10 @@ function renderComponent(comp) {
   } else if (comp.componentDidMount) {
     comp.componentDidMount();
   } // 节点替换
+  // if( comp.base && comp.base.parentNode ){
+  //     comp.base.parentNode.replaceChild( base, comp.base )
+  // }
 
-
-  if (comp.base && comp.base.parentNode) {
-    comp.base.parentNode.replaceChild(base, comp.base);
-  }
 
   comp.base = base;
 }
@@ -459,6 +562,8 @@ var React = {
 };
 
 function createElement(tag, attrs) {
+  attrs = attrs || {};
+
   for (var _len = arguments.length, childrens = new Array(_len > 2 ? _len - 2 : 0), _key = 2; _key < _len; _key++) {
     childrens[_key - 2] = arguments[_key];
   }
@@ -466,7 +571,8 @@ function createElement(tag, attrs) {
   return {
     tag: tag,
     attrs: attrs,
-    childrens: childrens
+    childrens: childrens,
+    key: attrs.key || null
   };
 }
 
@@ -513,7 +619,7 @@ function Home() {
   return _index.default.createElement("div", {
     className: "active",
     title: "tan"
-  });
+  }, "hello,", _index.default.createElement("span", null, "react"));
 }
 
 var Tan =
@@ -570,7 +676,9 @@ function (_React$Component) {
   }, {
     key: "render",
     value: function render() {
-      return _index.default.createElement("div", null, _index.default.createElement("h1", null, "\u6211\u662F\u7C7B\u7EC4\u4EF6-----", this.state.num), _index.default.createElement("button", {
+      return _index.default.createElement("div", {
+        className: "active"
+      }, _index.default.createElement("h1", null, "\u6211\u662F\u7C7B\u7EC4\u4EF6-----", this.state.num), _index.default.createElement("button", {
         onClick: this.handleClick.bind(this)
       }, "\u70B9\u51FB"));
     }
@@ -580,7 +688,7 @@ function (_React$Component) {
 }(_index.default.Component); // ReactDOM.render( <Home name="arr name" />, document.querySelector("#root") )
 
 
-_index2.default.render(ele, document.querySelector("#root")); // "use strict";
+_index2.default.render(_index.default.createElement(Tan, null), document.querySelector("#root")); // "use strict";
 // var ele = React.createElement("div", {
 //   className: "active",
 //   title: "tan"
@@ -614,7 +722,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "10647" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "1691" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

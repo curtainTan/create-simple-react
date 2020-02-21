@@ -6,7 +6,7 @@
 // ReactDOM.render( "my React", document.querySelector("#root") )
 
 import Component from "../react/component"
-import { diff } from "./diff"
+import { diff, diffNode } from "./diff"
 
 const ReactDOM = {
     render
@@ -54,7 +54,7 @@ function _render( vnode ){
 }
 
 
-function createComponent( comp, props ){
+export function createComponent( comp, props ){
     let instance
     // 如果是类定义在组件，则创建实例  返回
     if( comp.prototype && comp.prototype.render ){
@@ -72,7 +72,7 @@ function createComponent( comp, props ){
 }
 
 // 设置组件属性
-function setComponentProps( comp, props ){
+export function setComponentProps( comp, props ){
     if( !comp.base ){
         // 生命周期 -------   willMount
         if( comp.componentWillMount ){
@@ -89,7 +89,9 @@ function setComponentProps( comp, props ){
 // 渲染组件
 export function renderComponent( comp ){
     const renderer = comp.render()
-    let base = _render( renderer )
+    // let base = _render( renderer )
+    // 重新渲染
+    let base = diffNode( comp.base, renderer )
     if( comp.base && comp.componentWillUpdate ){
         comp.componentWillUpdate()
     }
@@ -100,9 +102,9 @@ export function renderComponent( comp ){
     }
 
     // 节点替换
-    if( comp.base && comp.base.parentNode ){
-        comp.base.parentNode.replaceChild( base, comp.base )
-    }
+    // if( comp.base && comp.base.parentNode ){
+    //     comp.base.parentNode.replaceChild( base, comp.base )
+    // }
 
     comp.base = base
 }
