@@ -19,6 +19,8 @@ function _render( vnode ){
     if( vnode === undefined || vnode === null || typeof vnode === "boolean" )
     return
 
+    // 数字转换成 字符串
+    if( typeof vnode === "number" ) vnode = String( vnode )
     // 如果 vnode 是字符串，直接渲染
     if( typeof vnode === "string" ){
         // 创建文本节点
@@ -26,7 +28,6 @@ function _render( vnode ){
     }
     // 如果 tag 是函数， 则渲染组件
     if( typeof vnode.tag === "function" ){
-        console.log( "函数组件---",vnode.tag )
         // 1. 创建组件
         const comp = createComponent( vnode.tag, vnode.attrs )
         // 2. 设置组件的属性
@@ -46,7 +47,7 @@ function _render( vnode ){
         })
     }
     // 渲染子节点
-    vnode.childrens.forEach( child => render( child, dom ) )
+    vnode.childrens && vnode.childrens.forEach( child => render( child, dom ) )
     // 返回节点 并挂载子节点
     return dom
 }
@@ -71,19 +72,38 @@ function createComponent( comp, props ){
 
 // 设置组件属性
 function setComponentProps( comp, props ){
+    if( !comp.base ){
+        // 生命周期 -------   willMount
+        if( comp.componentWillMount ){
+            comp.componentWillMount()
+        }
+    } else if( comp.componentWillReceiveProps ){
+        comp.componentWillReceiveProps( props )
+    }
     // 设置组件属性
     comp.props = props
     // 渲染组件
     renderComponent( comp )
 }
 // 渲染组件
-function renderComponent( comp ){
-    console.log( "渲染组件-----renderComponent",comp )
+export function renderComponent( comp ){
     const renderer = comp.render()
-    console.log( renderer )
     let base = _render( renderer )
-    comp.base = base
+    if( comp.base && comp.componentWillUpdate ){
+        comp.componentWillUpdate()
+    }
+    if( comp.base ){
+        if( comp.componentDidUpdate ) comp.componentDidUpdate()
+    } else if( comp.componentDidMount ){
+        comp.componentDidMount()
+    }
 
+    // 节点替换
+    if( comp.base && comp.base.parentNode ){
+        comp.base.parentNode.replaceChild( base, comp.base )
+    }
+
+    comp.base = base
 }
 
 /**
