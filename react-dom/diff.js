@@ -38,7 +38,6 @@ export function diffNode( dom, vnode ){
         return diffComponent( out, vnode )
     }
 
-    console.log( "执行到这里ile---" )
     // 非文本 DOM 节点
     if( !dom ){
         out = document.createElement( vnode.tag )
@@ -94,13 +93,13 @@ function diffChildren( dom, vChildren ){
 
     // 将有 key 的节点（用对象保存）和没有 key 的节点（用数组保存）分开
     if( domChildren && domChildren.length > 0 ){
-        vChildren.forEach( item => {
-            if( item.key !== null ){
-                keyed[item.key] = item
+        for( let i = 0; i < domChildren.length; i ++ ){
+            if( vChildren[i].key ){
+                keyed[vChildren[i].key] = domChildren[i]
             } else {
-                children.push( item )
+                children.push( domChildren[i] )
             }
-        })
+        }
     }
     if( vChildren && vChildren.length > 0 ){
         let min = 0

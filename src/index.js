@@ -29,7 +29,8 @@ class Tan extends React.Component {
     constructor(props){
         super( props )
         this.state = {
-            num: 0
+            num: 0,
+            list: [ 1,2,3,4,5 ]
         }
     }
 
@@ -43,6 +44,7 @@ class Tan extends React.Component {
 
     componentDidMount(){
         console.log( "组件加载完成--" )
+        console.log( this.state.list )
     }
 
     componentWillUpdate(){
@@ -62,11 +64,17 @@ class Tan extends React.Component {
     }
 
     render(){
+        console.log( "render---" ,this.state.list )
         return (
             <div className="active">
                 <h1>我是类组件-----{ this.state.num }</h1>
                 <button onClick={ this.handleClick.bind( this ) } >点击</button>
-                {/* <h1 key={"test_key"} >我是一个有key的组件</h1> */}
+                {/* {
+                    this.state.list.map( item => {
+                        return <p>{ item }</p>
+                    })
+                } */}
+                <h1>数组的长度：{ this.state.list.length }</h1>
             </div>
         )
     }

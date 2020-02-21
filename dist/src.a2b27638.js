@@ -174,9 +174,8 @@ function diffNode(dom, vnode) {
 
   if (typeof vnode.tag === "function") {
     return diffComponent(out, vnode);
-  }
+  } // 非文本 DOM 节点
 
-  console.log("执行到这里ile---"); // 非文本 DOM 节点
 
   if (!dom) {
     out = document.createElement(vnode.tag);
@@ -235,13 +234,13 @@ function diffChildren(dom, vChildren) {
   var keyed = {}; // 将有 key 的节点（用对象保存）和没有 key 的节点（用数组保存）分开
 
   if (domChildren && domChildren.length > 0) {
-    vChildren.forEach(function (item) {
-      if (item.key !== null) {
-        keyed[item.key] = item;
+    for (var i = 0; i < domChildren.length; i++) {
+      if (vChildren[i].key) {
+        keyed[vChildren[i].key] = domChildren[i];
       } else {
-        children.push(item);
+        children.push(domChildren[i]);
       }
-    });
+    }
   }
 
   if (vChildren && vChildren.length > 0) {
@@ -634,7 +633,8 @@ function (_React$Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Tan).call(this, props));
     _this.state = {
-      num: 0
+      num: 0,
+      list: [1, 2, 3, 4, 5]
     };
     return _this;
   }
@@ -653,6 +653,7 @@ function (_React$Component) {
     key: "componentDidMount",
     value: function componentDidMount() {
       console.log("组件加载完成--");
+      console.log(this.state.list);
     }
   }, {
     key: "componentWillUpdate",
@@ -676,11 +677,12 @@ function (_React$Component) {
   }, {
     key: "render",
     value: function render() {
+      console.log("render---", this.state.list);
       return _index.default.createElement("div", {
         className: "active"
       }, _index.default.createElement("h1", null, "\u6211\u662F\u7C7B\u7EC4\u4EF6-----", this.state.num), _index.default.createElement("button", {
         onClick: this.handleClick.bind(this)
-      }, "\u70B9\u51FB"));
+      }, "\u70B9\u51FB"), _index.default.createElement("h1", null, "\u6570\u7EC4\u7684\u957F\u5EA6\uFF1A", this.state.list.length));
     }
   }]);
 
@@ -722,7 +724,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "1691" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "7345" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
