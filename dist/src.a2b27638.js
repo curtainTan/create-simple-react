@@ -138,6 +138,7 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 function diff(dom, vnode, container) {
   // 对比节点变化
+  console.log("组件vnode:----", vnode);
   var ret = diffNode(dom, vnode);
 
   if (container) {
@@ -246,7 +247,6 @@ function diffChildren(dom, vChildren) {
   if (vChildren && vChildren.length > 0) {
     var min = 0;
     var childrenLen = vChildren.length;
-    console.log("开始 forEarch:", vChildren);
 
     _toConsumableArray(vChildren).forEach(function (vChild, i) {
       var key = vChild.key;
@@ -427,7 +427,9 @@ function setComponentProps(comp, props) {
 
 
 function renderComponent(comp) {
-  var renderer = comp.render(); // let base = _render( renderer )
+  console.log("类组件渲染前：", comp);
+  var renderer = comp.render();
+  console.log("类组件渲染：", renderer); // let base = _render( renderer )
   // 重新渲染
 
   var base = (0, _diff.diffNode)(comp.base, renderer);
@@ -665,12 +667,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
 function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
 
 function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
@@ -681,10 +677,18 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
 
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
 var ele = _index.default.createElement("div", {
   className: "active",
   title: "tan"
-}, "hello,", _index.default.createElement("span", null, "react")); // react核心：组件化开发
+}, "hello,", _index.default.createElement("span", null, "react"), _index.default.createElement(Home, {
+  name: "arr name"
+}), _index.default.createElement(Hometest, null)); // react核心：组件化开发
 // 两个问题：
 // 1. 为什么 ReactDOM.render() 函数需要引入 React  需要使用 React.createElement() 生成 vnode
 // 2. 组件：函数组件 类组件
@@ -695,8 +699,27 @@ function Home() {
   return _index.default.createElement("div", {
     className: "active",
     title: "tan"
-  }, "hello,", _index.default.createElement("span", null, "react"));
+  }, "hello,", _index.default.createElement("span", null, "react"), _index.default.createElement(Tan, {
+    tan: "我是传进来的参数"
+  }));
 }
+
+var Hometest =
+/*#__PURE__*/
+function () {
+  function Hometest() {
+    _classCallCheck(this, Hometest);
+  }
+
+  _createClass(Hometest, [{
+    key: "render",
+    value: function render() {
+      return _index.default.createElement("div", null, "\u6211\u662F\u6D4B\u8BD5\u7684 Hometest \u7EC4\u4EF6");
+    }
+  }]);
+
+  return Hometest;
+}();
 
 var Tan =
 /*#__PURE__*/
@@ -730,11 +753,9 @@ function (_React$Component) {
     key: "componentDidMount",
     value: function componentDidMount() {
       console.log("组件加载完成--");
-      console.log(this.state.list);
 
       for (var i = 0; i < 10; i++) {
         this.setState(function (preState, preProps) {
-          console.log("之前的状态：", preState);
           return {
             num: preState.num + 1
           };
@@ -763,7 +784,6 @@ function (_React$Component) {
   }, {
     key: "render",
     value: function render() {
-      console.log("render---", this.state.list);
       return _index.default.createElement("div", {
         className: "active"
       }, _index.default.createElement("h1", null, "\u6211\u662F\u7C7B\u7EC4\u4EF6-----", this.state.num), _index.default.createElement("button", {
@@ -773,10 +793,13 @@ function (_React$Component) {
   }]);
 
   return Tan;
-}(_index.default.Component); // ReactDOM.render( <Home name="arr name" />, document.querySelector("#root") )
+}(_index.default.Component);
 
-
-_index2.default.render(_index.default.createElement(Tan, null), document.querySelector("#root")); // "use strict";
+_index2.default.render(_index.default.createElement(Home, {
+  name: "arr name"
+}), document.querySelector("#root")); // ReactDOM.render( <Tan />, document.querySelector("#root") )
+// console.log( ele )
+// "use strict";
 // var ele = React.createElement("div", {
 //   className: "active",
 //   title: "tan"
@@ -810,7 +833,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "9213" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "4305" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

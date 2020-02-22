@@ -2,6 +2,7 @@ import { setAttribute, setComponentProps, createComponent } from "./index.js"
 
 export function diff( dom, vnode, container ){
     // 对比节点变化
+    console.log( "组件vnode:----", vnode )
     const ret = diffNode( dom, vnode )
 
     if( container ){
@@ -104,7 +105,6 @@ function diffChildren( dom, vChildren ){
     if( vChildren && vChildren.length > 0 ){
         let min = 0
         let childrenLen = vChildren.length;
-        console.log( "开始 forEarch:", vChildren );
         [ ...vChildren ].forEach( ( vChild, i ) => {
             const key = vChild.key
             let child

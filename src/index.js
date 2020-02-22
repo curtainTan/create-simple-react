@@ -4,6 +4,8 @@ import ReactDOM from "../react-dom/index.js"
 const ele = (
     <div className="active" title="tan">
         hello,<span>react</span>
+        <Home name="arr name" />
+        <Hometest />
     </div>
 )
 
@@ -19,9 +21,17 @@ function Home(){
     return (
         <div className="active" title="tan">
             hello,<span>react</span>
-            {/* <Tan tan="我是传进来的参数" /> */}
+            <Tan tan="我是传进来的参数" />
         </div>
     )
+}
+
+class Hometest {
+    render(){
+        return (
+            <div>我是测试的 Hometest 组件</div>
+        )
+    }
 }
 
 class Tan extends React.Component {
@@ -44,10 +54,8 @@ class Tan extends React.Component {
 
     componentDidMount(){
         console.log( "组件加载完成--" )
-        console.log( this.state.list )
         for( let i = 0; i < 10; i ++  ){
             this.setState( ( preState, preProps ) => {
-                console.log( "之前的状态：", preState )
                 return {
                     num: preState.num + 1
                 }
@@ -72,7 +80,6 @@ class Tan extends React.Component {
     }
 
     render(){
-        console.log( "render---" ,this.state.list )
         return (
             <div className="active">
                 <h1>我是类组件-----{ this.state.num }</h1>
@@ -88,10 +95,10 @@ class Tan extends React.Component {
     }
 }
 
-// ReactDOM.render( <Home name="arr name" />, document.querySelector("#root") )
-ReactDOM.render( <Tan />, document.querySelector("#root") )
+ReactDOM.render( <Home name="arr name" />, document.querySelector("#root") )
+// ReactDOM.render( <Tan />, document.querySelector("#root") )
 
-
+// console.log( ele )
 
 // "use strict";
 

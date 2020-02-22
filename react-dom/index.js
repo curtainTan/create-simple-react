@@ -88,7 +88,9 @@ export function setComponentProps( comp, props ){
 }
 // 渲染组件
 export function renderComponent( comp ){
+    console.log( "类组件渲染前：", comp )
     const renderer = comp.render()
+    console.log( "类组件渲染：", renderer )
     // let base = _render( renderer )
     // 重新渲染
     let base = diffNode( comp.base, renderer )
