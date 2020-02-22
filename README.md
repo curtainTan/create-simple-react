@@ -1,5 +1,13 @@
 # 从 0 写一个简单的 React.js
 
+预览：[点击直达](https://curtaintan.github.io/create-simple-react/dist/index.html)
+
+源码地址：[github](https://github.com/curtainTan/create-simple-react)
+
+文章地址：[博客-从 0 写一个简单的 React.js](http://blog.curtaintan.blog/2020/02/23/%E4%BB%8E0%E5%86%99%E4%B8%80%E4%B8%AA%E7%AE%80%E5%8D%95%E7%9A%84React.js/)
+
+---
+
 跟着教程**[从0撸一个丐版React.js](https://www.bilibili.com/video/av68588169)**一步一步搭建而成，虽有不懂，但是收获良多。
 
 简单的实现如下功能：
