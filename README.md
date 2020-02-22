@@ -29,7 +29,7 @@ const ele = (
 )
 console.log( ele )
 ```
-![](https://image.gslb.dawnlab.me/a5f402a0b0b9d8d105d1993394bb8bb7.png)
+<img src=https://image.gslb.dawnlab.me/a5f402a0b0b9d8d105d1993394bb8bb7.png alt="图片显示失败" />
 
 ## 3. react-dom 将 vnode 转换成真正的 DOM (此时没有实现组件)
 
@@ -98,6 +98,7 @@ console.log( ele )
 ```
 
 ![](https://image.gslb.dawnlab.me/63dc847ab7cf8eb4764eb45a4136af2d.png)
+<img src=https://image.gslb.dawnlab.me/63dc847ab7cf8eb4764eb45a4136af2d.png alt="图片显示失败" />
 
 可见，`<Home />` 被转换成了一个函数，此时，在 render 函数中，我们要多一个判断，并且我们将函数组件封装成类组件，方便统一管理、注入生命周期等，执行过程：
 
@@ -110,6 +111,7 @@ console.log( ele )
 **实现代码请参考：**react-dom/index.js
 
 ![](https://image.gslb.dawnlab.me/9d9cc84c24a612978e42a33c59e1ca1c.png)
+<img src=https://image.gslb.dawnlab.me/9d9cc84c24a612978e42a33c59e1ca1c.png alt="图片显示失败" />
 
 ## 5. 实现生命周期
 
